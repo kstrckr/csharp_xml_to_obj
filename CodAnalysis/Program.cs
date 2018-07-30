@@ -17,8 +17,8 @@ namespace CodAnalysis
 
             CodListModel allCodRecords = new CodListModel();
 
-            List<CodRecord> tempRecords = new List<CodRecord>();
-
+            int deathSums = 0;
+            
             foreach (XmlNode xmlNode in xmlDoc.DocumentElement.ChildNodes[0])
             {                
                 int year;
@@ -61,24 +61,32 @@ namespace CodAnalysis
                     Aadr = aadr
                 };
 
-                tempRecords.Add(cod);
+                // This file includes entries for Nation-Wide Sums for each
+                // COD every year, this ignores those, since we're doing our own sum
+
+                if (cod.State == "United States")
+                {
+                    deathSums += cod.Deaths;
+                    continue;
+                }
+
+                allCodRecords.CodRecords.Add(cod);
             }
 
-            allCodRecords.CodRecords = tempRecords;
+            allCodRecords.BuildTotalsValues();
 
-            HashSet<int> allStates = new HashSet<int>();
+            //Console.WriteLine("{0:N0}", deathSums);
 
-            foreach (CodRecord values in allCodRecords.CodRecords)
-            {
-                allStates.Add(values.Year);
-            }
-
-            foreach (int state in allStates)
-            {
-                Console.WriteLine(state);
-            }
-
-            // Keep console open until any key is pressed
+            Console.WriteLine("\nThis XML DataSet contains {0:N0} records covering:\n" +
+                "\n {1} Years" +
+                "\n {2:N0} Deaths" +
+                "\n in {3} States (Including Washington DC)" +
+                "\n by {4} Unique Causes",
+                allCodRecords.CodRecords.Count,
+                allCodRecords.YearsCovered.Count,
+                allCodRecords.TotalDeathsRecorded,
+                allCodRecords.UniqueStates.Count,
+                allCodRecords.UniqueCauses.Count);
             
             Console.WriteLine("\nPress any key to close Consle");
             Console.ReadKey();
